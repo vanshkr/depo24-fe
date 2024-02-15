@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { jwtDecode } from "jwt-decode";
 const API = axios.create({ baseURL: import.meta.env.VITE_DOMAIN_URL });
 
 API.interceptors.request.use((req) => {
@@ -16,7 +16,7 @@ export const signInAccount = async (userData) => {
     const response = await API.post(`/auth/signin`, userData);
     const { token } = response.data;
 
-    localStorage.setItem("token", token);
+    localStorage.setItem("cloakCode", token);
     return response;
   } catch (error) {
     throw new Error("Sign in failed. Please try again.");
@@ -28,10 +28,24 @@ export const signUpAccount = async (userData) => {
     const response = await API.post(`/auth/signup`, userData);
     const { token } = response.data;
 
-    localStorage.setItem("token", token);
+    localStorage.setItem("cloakCode", token);
 
     return response;
   } catch (error) {
     throw new Error("Sign up failed. Please try again.");
   }
+};
+
+export const getAccount = async () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        const userToken = localStorage.getItem("cloakCode");
+        const currentUser = jwtDecode(userToken);
+        resolve(currentUser);
+      } catch (err) {
+        reject(new Error("Token not present."));
+      }
+    }, 500);
+  });
 };

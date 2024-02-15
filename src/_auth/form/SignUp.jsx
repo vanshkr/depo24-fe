@@ -16,9 +16,11 @@ import { useForm } from "react-hook-form";
 import { Loader } from "@/components/ui/custom/Loader";
 import { Link, useNavigate } from "react-router-dom";
 import { signUpAccount } from "@/lib/axios/api";
+import { useAuth } from "@/lib/context/AuthContext";
 
 const SignUp = () => {
   const { toast } = useToast();
+  const { checkAuthUser, isLoading: isUserLoading } = useAuth();
   const form = useForm({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
@@ -32,6 +34,10 @@ const SignUp = () => {
   async function onSubmit(userData) {
     try {
       await signUpAccount(userData);
+      const isLoggedIn = await checkAuthUser();
+      if (!isLoggedIn) {
+        throw new Error("Authentication failed. Please try again. ");
+      }
       toast({
         title: "Signed up successfully. ",
       });
@@ -139,7 +145,7 @@ const SignUp = () => {
           />
           <div className="flex flex-col gap-y-4">
             <Button className="shad-button_primary " type="submit">
-              {"" ? (
+              {isUserLoading ? (
                 <div className="flex-center gap-2">
                   <Loader /> Loading...
                 </div>
