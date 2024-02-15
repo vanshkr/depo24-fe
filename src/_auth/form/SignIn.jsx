@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Form,
   FormControl,
@@ -14,9 +15,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Loader } from "@/components/ui/custom/Loader";
 import { Link, useNavigate } from "react-router-dom";
+import { signInAccount } from "../../lib/axios/api";
 
 const SignIn = () => {
   const isLoading = false;
+  const {toast} = useToast();
   const form = useForm({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
@@ -27,8 +30,16 @@ const SignIn = () => {
   const navigate = useNavigate();
   async function onSubmit(userData) {
     try {
-      console.log(userData);
+      await signInAccount(userData);
+      toast({
+        title: "Signed in successfully. ",
+      });
       navigate("/");
+    } catch (err) {
+      toast({
+        title: "Something went wrong",
+        description: err.message,
+      });
     } finally {
       form.reset();
     }
@@ -39,7 +50,7 @@ const SignIn = () => {
         <img
           src="/assets/images/logo.png"
           alt="logo"
-          width={250}
+          width={200}
           className="self-start"
         />
         <h2 className="h3-bold md:h2-bold pt-5 sm:pt-12">
@@ -51,7 +62,7 @@ const SignIn = () => {
 
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 w-full mt-4"
+          className="flex flex-col gap-3 w-full mt-3"
         >
           <FormField
             control={form.control}
