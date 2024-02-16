@@ -42,6 +42,7 @@ export const getAccount = async () => {
       try {
         const userToken = localStorage.getItem("cloakCode");
         const currentUser = jwtDecode(userToken);
+        console.log(currentUser);
         resolve(currentUser);
       } catch (err) {
         reject(new Error("Token not present."));

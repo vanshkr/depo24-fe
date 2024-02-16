@@ -1,12 +1,14 @@
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Loader } from "./Loader";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Plus, MessageCircleMore } from "lucide-react";
+import { Plus, MessageCircleMore, Users } from "lucide-react";
+import { useState, useRef } from "react";
+import Modal from "./Modal";
 const Sidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const textRef = useRef("");
   const words = user?.name.split(" ");
   let initials = "";
 
@@ -23,9 +25,16 @@ const Sidebar = () => {
     // setUser(INITIAL_USER);
     navigate("/signIn");
   };
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const onModalClose = () => {
+    setIsModalOpen(false);
+  };
   return (
     <nav className="hidden md:flex gap-4  flex-col min-w-[280px] max-w-[350px] bg-dark-4 border-r-2 border-gray-500 ">
+      {isModalOpen ? (
+        <Modal textToShow={textRef.current} onModalClose={onModalClose} />
+      ) : undefined}
       <section className="flex justify-center items-center px-2 py-2 bg-dark-2 h-16">
         <img src="/assets/images/logo.png" alt="logo" width={140} />
       </section>
@@ -39,9 +48,26 @@ const Sidebar = () => {
         </Button>
       </section>
 
-      <Button className="bg-primary-500 hover:bg-primary-500 text-light-1 flex gap-2">
-        <Plus className="w-4 h-4" /> Create Room
-      </Button>
+      <div className="flex gap-3 px-1">
+        <Button
+          className="bg-primary-500 hover:bg-primary-500 text-light-1 flex gap-1 text-sm"
+          onClick={() => {
+            textRef.current = "Create Room";
+            setIsModalOpen(true);
+          }}
+        >
+          <Plus className="w-4 h-4" /> Create Room
+        </Button>
+        <Button
+          className="bg-primary-500 hover:bg-primary-500 text-light-1 flex gap-1"
+          onClick={() => {
+            textRef.current = "Join Room";
+            setIsModalOpen(true);
+          }}
+        >
+          <Users className="w-4 h-4" /> Join Room
+        </Button>
+      </div>
       <div className="overflow-y-auto overflow-x-hidden border-t-4 border-white pt-2">
         <h2 className="text-xl m-2">Conversations</h2>
         {true ? (
