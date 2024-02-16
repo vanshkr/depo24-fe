@@ -1,10 +1,11 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-
+import Sidebar from "@/components/ui/custom/Sidebar";
 const RootLayout = () => {
   return (
     <div className="flex w-full">
-      <section>
+      <Sidebar />
+      <section className="flex flex-1">
         <Outlet />
       </section>
     </div>
