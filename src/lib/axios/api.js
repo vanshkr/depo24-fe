@@ -4,9 +4,7 @@ const API = axios.create({ baseURL: import.meta.env.VITE_DOMAIN_URL });
 
 API.interceptors.request.use((req) => {
   if (localStorage.getItem("cloakCode")) {
-    req.headers.Authorization = `Bearer ${JSON.parse(
-      localStorage.getItem("cloakCode")
-    )}`;
+    req.headers.Authorization = `Bearer ${localStorage.getItem("cloakCode")}`;
   }
   return req;
 });
@@ -42,7 +40,6 @@ export const getAccount = async () => {
       try {
         const userToken = localStorage.getItem("cloakCode");
         const currentUser = jwtDecode(userToken);
-        console.log(currentUser);
         resolve(currentUser);
       } catch (err) {
         reject(new Error("Token not present."));
@@ -51,11 +48,7 @@ export const getAccount = async () => {
   });
 };
 
-export const getRoomList = async (userId) => {
-  try {
-    const response = await API.post(`/users/:${userId}/rooms`);
-    return response;
-  } catch (err) {
-    throw new Error("Fetching room details failed. ");
-  }
-};
+export const getRoomList = (userId) => API.get(`/users/${userId}/rooms`);
+
+export const getRoomDetails = (room, userId) =>
+  API.get(`/users/${userId}/rooms/${room}`);

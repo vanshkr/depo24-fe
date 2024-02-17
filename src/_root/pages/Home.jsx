@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-
+import { getRoomDetails } from "@/lib/axios/api";
 import { useAuth } from "@/lib/context/AuthContext";
 import { useOutletContext } from "react-router-dom";
 const Home = () => {
@@ -11,14 +11,16 @@ const Home = () => {
   const [messagesReceived, setMessagesReceived] = useState([]);
 
   useEffect(() => {
+    console.log("chalo");
     socket.on("receive_message", (data) => {
+      console.log(activeRoomId, data, "isi");
       if (activeRoomId === data.room) {
         setMessagesReceived((prevState) => [
           ...prevState,
           {
-            message: data.message,
+            content: data.content,
             username: data.username,
-            userId: data.userId,
+            senderId: data?.senderId,
             createdTime: data.createdTime,
           },
         ]);
@@ -27,23 +29,42 @@ const Home = () => {
     return () => {
       socket.off("receive_message");
     };
-  }, [socket.on]);
+  }, [socket]);
+
   useEffect(() => {
-    setMessagesReceived([]);
+    const fetchData = async () => {
+      try {
+        const response = await getRoomDetails(activeRoomId, user?.id);
+        return response.data.result;
+      } catch (error) {
+        console.error("Error fetching room details:", error);
+      }
+    };
+
+    fetchData().then((res) => {
+      const messages = res?.messages;
+      if (messages) {
+        setMessagesReceived([...messages]);
+      } else {
+        setMessagesReceived([]);
+      }
+    });
   }, [activeRoomId]);
+
   const handleSendMessage = () => {
     const message = inputRef.current.value;
     if (message !== "") {
       socket.emit("send_message", {
         username: user?.name,
         room: activeRoomId,
-        message,
-        userId: user?.id,
+        content: message,
+        senderId: user?.id,
       });
     }
 
     inputRef.current.value = "";
   };
+  console.log(socket, messagesReceived);
   return (
     <>
       {activeRoomId ? (
@@ -62,18 +83,28 @@ const Home = () => {
             <div className="self-start text-sm pr-2">time</div>
           </section>
           <div className="flex flex-col gap-4 px-2 overflow-y-auto">
-            {messagesReceived?.map((msgObj, index) => (
-              <div
-                className={`flex ${
-                  msgObj.userId === user?.id ? "justify-end" : "justify-start"
-                } mb-4`}
-                key={index}
-              >
-                <div className="bg-purple-200 rounded-lg px-4 py-2 max-w-md">
-                  <p className="text-purple-800">{msgObj.message}</p>
+            {messagesReceived?.map((msgObj, index) =>
+              msgObj.senderId ? (
+                <div
+                  className={`flex ${
+                    msgObj?.senderId === user?.id
+                      ? "justify-end"
+                      : "justify-start"
+                  } mb-4`}
+                  key={index}
+                >
+                  <div className="bg-purple-200 rounded-lg px-4 py-2 max-w-md">
+                    <p className="text-purple-800">{msgObj.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div className={`flex justify-center mb-4`} key={index}>
+                  <div className="bg-purple-200 rounded-lg px-4 py-2 max-w-md">
+                    <p className="text-purple-800">{msgObj.content}</p>
+                  </div>
+                </div>
+              )
+            )}
           </div>
           <div>
             {" "}

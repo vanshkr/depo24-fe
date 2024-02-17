@@ -15,7 +15,11 @@ const AuthLayout = () => {
             src="../assets/images/chat-app.png"
           />
         </>
-      ) : undefined}
+      ) : (
+        <div className="bg-black text-white h-screen flex justify-center items-center">
+          <p className="text-center">Page Not Accessible</p>
+        </div>
+      )}
     </>
   );
 };

@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/context/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, MessageCircleMore, Users } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { getRoomList } from "@/lib/axios/api";
 import Modal from "./Modal";
 const Sidebar = ({ socket }) => {
   const { user, setActiveRoomId } = useAuth();
@@ -19,7 +20,21 @@ const Sidebar = ({ socket }) => {
       initials += words[i][0].toUpperCase();
     }
   }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await getRoomList(user?.id);
+        return response.data.result;
+      } catch (error) {
+        console.error("Error fetching room details:", error);
+      }
+    };
 
+    fetchData().then((res) => {
+      const roomIds = res.map((room) => room.roomId);
+      setRoomList(() => [...roomIds]);
+    });
+  }, []);
   const handleSignOut = (e) => {
     e.preventDefault();
     // signOut();
