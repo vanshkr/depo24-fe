@@ -5,11 +5,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Plus, MessageCircleMore, Users } from "lucide-react";
 import { useState, useRef } from "react";
 import Modal from "./Modal";
-const Sidebar = () => {
+const Sidebar = ({ socket }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const textRef = useRef("");
-  const words = user?.name.split(" ");
+  const words = user?.name?.split(" ");
   let initials = "";
 
   if (user?.name) {
@@ -26,14 +26,18 @@ const Sidebar = () => {
     navigate("/signIn");
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [roomList, setRoomList] = useState([]);
   const onModalClose = () => {
     setIsModalOpen(false);
   };
   return (
     <nav className="hidden md:flex gap-4  flex-col min-w-[280px] max-w-[350px] bg-dark-4 border-r-2 border-gray-500 ">
       {isModalOpen ? (
-        <Modal textToShow={textRef.current} onModalClose={onModalClose} />
+        <Modal
+          textToShow={textRef.current}
+          onModalClose={onModalClose}
+          socket={socket}
+        />
       ) : undefined}
       <section className="flex justify-center items-center px-2 py-2 bg-dark-2 h-16">
         <img src="/assets/images/logo.png" alt="logo" width={140} />

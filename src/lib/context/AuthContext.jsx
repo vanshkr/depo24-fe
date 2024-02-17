@@ -12,9 +12,11 @@ const INTIAL_STATE = {
   user: DEFAULT_USER,
   isLoading: false,
   isAuthenticated: false,
+  activeRoomId: "",
   setUser: () => {},
   setIsAuthenticated: () => {},
   checkAuthUser: async () => false,
+  setActiveRoomId: () => {},
 };
 
 const AuthContext = createContext(INTIAL_STATE);
@@ -23,11 +25,11 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(DEFAULT_USER);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeRoomId, setActiveRoomId] = useState("");
   const navigate = useNavigate();
   const checkAuthUser = async () => {
     setIsLoading(true);
     try {
-      
       const currentUser = await getAccount();
       setIsAuthenticated(true);
       setUser({
@@ -55,9 +57,11 @@ const AuthProvider = ({ children }) => {
     user,
     isLoading,
     isAuthenticated,
+    activeRoomId,
     setUser,
     setIsAuthenticated,
     checkAuthUser,
+    setActiveRoomId,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
