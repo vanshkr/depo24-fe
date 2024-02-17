@@ -50,3 +50,12 @@ export const getAccount = async () => {
     }, 500);
   });
 };
+
+export const getRoomList = async (userId) => {
+  try {
+    const response = await API.post(`/users/:${userId}/rooms`);
+    return response;
+  } catch (err) {
+    throw new Error("Fetching room details failed. ");
+  }
+};

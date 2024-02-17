@@ -31,6 +31,7 @@ const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const currentUser = await getAccount();
+      console.log(currentUser);
       setIsAuthenticated(true);
       setUser({
         id: currentUser?.id,

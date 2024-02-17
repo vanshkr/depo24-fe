@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useToast } from "../use-toast";
 import { useAuth } from "@/lib/context/AuthContext";
 
-function Modal({ textToShow, onModalClose, socket }) {
+function Modal({ textToShow, onModalClose, socket, setRoomList }) {
   const { checkAuthUser, user, setActiveRoomId } = useAuth();
   const inputRef = useRef(null);
   const { toast } = useToast();
@@ -34,6 +34,7 @@ function Modal({ textToShow, onModalClose, socket }) {
     }
 
     setActiveRoomId(room);
+    setRoomList((prev) => [...prev, room]);
     onModalClose();
   };
 
