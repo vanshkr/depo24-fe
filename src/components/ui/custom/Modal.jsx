@@ -37,7 +37,6 @@ function Modal({ textToShow, onModalClose, socket, setRoomList, users }) {
     setRoomList((prev) => [...prev, room]);
     onModalClose();
   };
-  console.log(users);
   return (
     <>
       {!users.length ? (

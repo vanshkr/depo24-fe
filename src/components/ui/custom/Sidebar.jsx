@@ -25,10 +25,9 @@ const Sidebar = ({ socket }) => {
     const fetchData = async () => {
       try {
         const response = await getRoomList(user?.id);
-        console.log(response, "res");
         return response.data.result;
       } catch (error) {
-        console.error("Error fetching room details:", error);
+        return error;
       }
     };
 
@@ -39,6 +38,7 @@ const Sidebar = ({ socket }) => {
   }, []);
   const handleSignOut = (e) => {
     e.preventDefault();
+    socket.disconnect();
     logout();
   };
 
@@ -94,6 +94,7 @@ const Sidebar = ({ socket }) => {
         {roomList.length ? (
           roomList.map((room, index) => (
             <section
+              key={room}
               onClick={() => setActiveRoomId(room)}
               className={`hover:shad-button_primary flex justify-between items-center px-2 py-2 ${
                 index % 2 === 0 ? "even:bg-dark-2" : "odd:bg-dark-4"

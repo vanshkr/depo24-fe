@@ -12,10 +12,10 @@ const Home = () => {
   const [messagesReceived, setMessagesReceived] = useState([]);
   const [participants, setParticipants] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const messageListRef = useRef(null);
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
-      console.log(data, "data");
       setMessagesReceived((prevState) => [
         ...prevState,
         {
@@ -38,19 +38,19 @@ const Home = () => {
         const response = await getRoomDetails(activeRoomId, user?.id);
         return response.data.result;
       } catch (error) {
-        console.error("Error fetching room details:", error);
+        return error;
       }
     };
 
     fetchData().then((res) => {
       const messages = res?.messages;
       const users = res?.participants;
-      console.log(res, "res");
       if (messages) {
         setMessagesReceived([...messages]);
         setParticipants([...users]);
       } else {
         setMessagesReceived([]);
+        setParticipants([]);
       }
     });
     return () => {
@@ -84,7 +84,12 @@ const Home = () => {
     const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
     return `${formattedHours}:${formattedMinutes} ${ampm}`;
   }
-  console.log(messagesReceived);
+
+  useEffect(() => {
+    if (messageListRef.current) {
+      messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+    }
+  }, [messagesReceived]);
   return (
     <>
       {activeRoomId ? (
@@ -100,23 +105,26 @@ const Home = () => {
               <Contact />
             </Button>
           </section>
-          <div className="flex h-screen flex-col gap-4 px-2 overflow-y-auto">
+          <div
+            className="flex h-screen justify-start flex-col gap-4 px-2 overflow-y-auto"
+            ref={messageListRef}
+          >
             {messagesReceived?.map((msgObj, index) =>
               msgObj.senderId ? (
                 <div
                   className={`flex ${
-                    msgObj?.senderId === user?.id
+                    msgObj.senderId === user?.id
                       ? "justify-end"
                       : "justify-start"
                   } mb-4 text-white`}
                   key={index}
                 >
                   <div
-                    className={` flex ${
-                      msgObj?.senderId === user?.id
+                    className={`flex ${
+                      msgObj.senderId === user?.id
                         ? "bg-green-500"
                         : "bg-dark-2"
-                    } mb-4  rounded-lg px-4 py-2 max-w-md`}
+                    } mb-4 rounded-lg px-4 py-2 max-w-md`}
                   >
                     <p className="pr-3">{msgObj.content}</p>
                     <p className="text-light-4 text-xs self-end">
@@ -125,7 +133,7 @@ const Home = () => {
                   </div>
                 </div>
               ) : (
-                <div className={`flex justify-center mb-4`} key={index}>
+                <div className="flex justify-center mb-4" key={index}>
                   <div className="bg-purple-200 rounded-lg px-4 py-2 max-w-md">
                     <p className="text-purple-800">{msgObj.content}</p>
                   </div>

@@ -6,13 +6,6 @@ import { useAuth } from "@/lib/context/AuthContext";
 const socket = io("http://localhost:5000");
 const RootLayout = () => {
   const { isAuthenticated } = useAuth();
-  console.log(isAuthenticated);
-  useEffect(() => {
-    // return () => {
-    //   socket.disconnect();
-    //   socket.off();
-    // };
-  }, []);
   return (
     <>
       {isAuthenticated ? (

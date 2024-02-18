@@ -42,7 +42,6 @@ const AuthProvider = ({ children }) => {
         logout();
         return false;
       }
-      console.log(currentUser, expirationTime, currentTime);
       setIsAuthenticated(true);
       setUser({
         id: currentUser?.id,
