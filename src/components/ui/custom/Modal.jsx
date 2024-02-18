@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useToast } from "../use-toast";
 import { useAuth } from "@/lib/context/AuthContext";
 
-function Modal({ textToShow, onModalClose, socket, setRoomList }) {
+function Modal({ textToShow, onModalClose, socket, setRoomList, users }) {
   const { checkAuthUser, user, setActiveRoomId } = useAuth();
   const inputRef = useRef(null);
   const { toast } = useToast();
@@ -37,33 +37,64 @@ function Modal({ textToShow, onModalClose, socket, setRoomList }) {
     setRoomList((prev) => [...prev, room]);
     onModalClose();
   };
-
+  console.log(users);
   return (
-    <div
-      className="fixed top-0 left-0 w-full h-screen flex items-center justify-center"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-    >
-      <div className="bg-white rounded-lg p-6 w-60">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-dark-2">{textToShow}</h2>
-          <Button onClick={onModalClose}>
-            <X className="text-black" />
-          </Button>
-        </div>
-        <input
-          type="text"
-          placeholder="Enter room ID"
-          className="border border-gray-300 rounded px-3 py-2 w-full mb-4 text-black"
-          ref={inputRef}
-        />
-        <Button
-          className="shad-button_primary w-full"
-          onClick={() => handleJoinRoom(textToShow)}
+    <>
+      {!users.length ? (
+        <div
+          className="fixed top-0 left-0 w-full h-screen flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
         >
-          {textToShow}
-        </Button>
-      </div>
-    </div>
+          <div className="bg-white rounded-lg p-6 w-60">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-dark-2">
+                {textToShow}
+              </h2>
+              <Button onClick={onModalClose}>
+                <X className="text-black" />
+              </Button>
+            </div>
+            <input
+              type="text"
+              placeholder="Enter room ID"
+              className="border border-gray-300 rounded px-3 py-2 w-full mb-4 text-black"
+              ref={inputRef}
+            />
+            <Button
+              className="shad-button_primary w-full"
+              onClick={() => handleJoinRoom(textToShow)}
+            >
+              {textToShow}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div
+          className="fixed top-0 left-0 w-full h-screen flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div className="bg-white rounded-lg p-6 w-60">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-dark-2">
+                {textToShow}
+              </h2>
+              <ul className="text-black">
+                <p className="font-bold mb-2">Users:</p>{" "}
+                {users.map((user) => (
+                  <li key={user._id} className="mb-1">
+                    <span className="inline-block bg-green-400 rounded-full w-3 h-3 mr-2"></span>{" "}
+                    {user.fullname}
+                  </li>
+                ))}
+              </ul>
+              <Button onClick={onModalClose}>
+                <X className="text-black" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

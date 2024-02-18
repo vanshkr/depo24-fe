@@ -1,30 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getRoomDetails } from "@/lib/axios/api";
 import { useAuth } from "@/lib/context/AuthContext";
 import { useOutletContext } from "react-router-dom";
+import { Contact } from "lucide-react";
+import Modal from "@/components/ui/custom/Modal";
 const Home = () => {
   const inputRef = useRef(null);
   const socket = useOutletContext();
   const { user, activeRoomId } = useAuth();
   const [messagesReceived, setMessagesReceived] = useState([]);
+  const [participants, setParticipants] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    console.log("chalo");
     socket.on("receive_message", (data) => {
-      console.log(activeRoomId, data, "isi");
-      if (activeRoomId === data.room) {
-        setMessagesReceived((prevState) => [
-          ...prevState,
-          {
-            content: data.content,
-            username: data.username,
-            senderId: data?.senderId,
-            createdTime: data.createdTime,
-          },
-        ]);
-      }
+      console.log(data, "data");
+      setMessagesReceived((prevState) => [
+        ...prevState,
+        {
+          content: data.content,
+          username: data.username,
+          senderId: data?.senderId,
+          timestamp: data.timestamp,
+        },
+      ]);
     });
     return () => {
       socket.off("receive_message");
@@ -32,6 +32,7 @@ const Home = () => {
   }, [socket]);
 
   useEffect(() => {
+    socket.emit("join", activeRoomId);
     const fetchData = async () => {
       try {
         const response = await getRoomDetails(activeRoomId, user?.id);
@@ -43,14 +44,22 @@ const Home = () => {
 
     fetchData().then((res) => {
       const messages = res?.messages;
+      const users = res?.participants;
+      console.log(res, "res");
       if (messages) {
         setMessagesReceived([...messages]);
+        setParticipants([...users]);
       } else {
         setMessagesReceived([]);
       }
     });
+    return () => {
+      socket.emit("leave", activeRoomId);
+    };
   }, [activeRoomId]);
-
+  const onModalClose = () => {
+    setIsModalOpen(false);
+  };
   const handleSendMessage = () => {
     const message = inputRef.current.value;
     if (message !== "") {
@@ -64,25 +73,34 @@ const Home = () => {
 
     inputRef.current.value = "";
   };
-  console.log(socket, messagesReceived);
+  function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const formattedHours = hours < 10 ? `0${hours}` : hours;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${formattedHours}:${formattedMinutes} ${ampm}`;
+  }
+  console.log(messagesReceived);
   return (
     <>
       {activeRoomId ? (
         <div className="flex w-full flex-col h-screen justify-between bg-dark-4">
+          {isModalOpen ? (
+            <Modal users={participants} onModalClose={onModalClose} />
+          ) : undefined}
           <section className="flex justify-between items-center px-2 py-2 bg-dark-2 h-16">
-            <div className="flex">
-              <Avatar className="border-2 border-white"></Avatar>
-
-              <div className="px-3 ">
-                <h2>{activeRoomId}</h2>
-                <p className="text-light-3 max-w-[200px] text-xs truncate">
-                  Lasadsffff
-                </p>
-              </div>
+            <div className="flex p-2 px-4">
+              <h2 className="text-2xl font-bold">{activeRoomId}</h2>
             </div>
-            <div className="self-start text-sm pr-2">time</div>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <Contact />
+            </Button>
           </section>
-          <div className="flex flex-col gap-4 px-2 overflow-y-auto">
+          <div className="flex h-screen flex-col gap-4 px-2 overflow-y-auto">
             {messagesReceived?.map((msgObj, index) =>
               msgObj.senderId ? (
                 <div
@@ -90,11 +108,20 @@ const Home = () => {
                     msgObj?.senderId === user?.id
                       ? "justify-end"
                       : "justify-start"
-                  } mb-4`}
+                  } mb-4 text-white`}
                   key={index}
                 >
-                  <div className="bg-purple-200 rounded-lg px-4 py-2 max-w-md">
-                    <p className="text-purple-800">{msgObj.content}</p>
+                  <div
+                    className={` flex ${
+                      msgObj?.senderId === user?.id
+                        ? "bg-green-500"
+                        : "bg-dark-2"
+                    } mb-4  rounded-lg px-4 py-2 max-w-md`}
+                  >
+                    <p className="pr-3">{msgObj.content}</p>
+                    <p className="text-light-4 text-xs self-end">
+                      {formatTimestamp(msgObj.timestamp)}
+                    </p>
                   </div>
                 </div>
               ) : (

@@ -31,7 +31,18 @@ const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const currentUser = await getAccount();
-      console.log(currentUser);
+      if (!currentUser || !currentUser.exp) {
+        return false;
+      }
+      const expirationTime = currentUser.exp * 1000;
+      const currentTime = Date.now();
+
+      const flag = expirationTime < currentTime;
+      if (flag) {
+        logout();
+        return false;
+      }
+      console.log(currentUser, expirationTime, currentTime);
       setIsAuthenticated(true);
       setUser({
         id: currentUser?.id,
@@ -45,7 +56,14 @@ const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-
+  const logout = () => {
+    localStorage.clear();
+    setActiveRoomId("");
+    setIsAuthenticated(false);
+    setIsLoading(false);
+    setUser(DEFAULT_USER);
+    navigate("/signIn");
+  };
   useEffect(() => {
     const cookie = localStorage.getItem("cloakCode");
     if (!cookie || cookie.length == 0) {
@@ -59,6 +77,7 @@ const AuthProvider = ({ children }) => {
     isLoading,
     isAuthenticated,
     activeRoomId,
+    logout,
     setUser,
     setIsAuthenticated,
     checkAuthUser,

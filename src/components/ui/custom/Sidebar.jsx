@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/context/AuthContext";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Plus, MessageCircleMore, Users } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { getRoomList } from "@/lib/axios/api";
 import Modal from "./Modal";
+
 const Sidebar = ({ socket }) => {
-  const { user, setActiveRoomId } = useAuth();
+  const { user, setActiveRoomId, logout } = useAuth();
   const navigate = useNavigate();
   const textRef = useRef("");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,6 +25,7 @@ const Sidebar = ({ socket }) => {
     const fetchData = async () => {
       try {
         const response = await getRoomList(user?.id);
+        console.log(response, "res");
         return response.data.result;
       } catch (error) {
         console.error("Error fetching room details:", error);
@@ -37,23 +39,21 @@ const Sidebar = ({ socket }) => {
   }, []);
   const handleSignOut = (e) => {
     e.preventDefault();
-    // signOut();
-    // setIsAuthenticated(false);
-    // setUser(INITIAL_USER);
-    navigate("/signIn");
+    logout();
   };
 
   const onModalClose = () => {
     setIsModalOpen(false);
   };
   return (
-    <nav className="hidden md:flex gap-4 h-screen  flex-col min-w-[280px] max-w-[350px] bg-dark-4 border-r-2 border-gray-500 ">
+    <nav className="flex gap-4 h-screen  flex-col min-w-[280px] max-w-[350px] bg-dark-4 border-r-2 border-gray-500 ">
       {isModalOpen ? (
         <Modal
           textToShow={textRef.current}
           onModalClose={onModalClose}
           socket={socket}
           setRoomList={setRoomList}
+          users={[]}
         />
       ) : undefined}
       <section className="flex justify-center items-center px-2 py-2 bg-dark-2 h-16">
@@ -99,19 +99,9 @@ const Sidebar = ({ socket }) => {
                 index % 2 === 0 ? "even:bg-dark-2" : "odd:bg-dark-4"
               } bg-dark-2`}
             >
-              <div className="flex">
-                <Avatar className="border-2 border-white">
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
-
-                <div className="px-3 ">
-                  <h2>{room}</h2>
-                  <p className="text-light-3 max-w-[200px] text-xs truncate">
-                    Lasadsffff
-                  </p>
-                </div>
+              <div className="flex p-2 px-4">
+                <h2 className="text-2xl font-bold">{room}</h2>
               </div>
-              <div className="self-start text-sm pr-2">time</div>
             </section>
           ))
         ) : (
