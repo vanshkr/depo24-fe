@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "@/components/ui/custom/Sidebar";
 import io from "socket.io-client";
 import { useAuth } from "@/lib/context/AuthContext";
-const socket = io(import.meta.env.VITE_DOMAIN_URL);
+const socket = io("https://depo24-be.vercel.app/");
 const RootLayout = () => {
   const { isAuthenticated } = useAuth();
   return (
